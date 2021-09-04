@@ -104,6 +104,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * current request -- for example with a subset of URL patterns.
 	 * @return an info in case of a match; or {@code null} otherwise.
 	 */
+	// eg1： info={GET [/hello]}  request
 	@Override
 	protected RequestMappingInfo getMatchingMapping(RequestMappingInfo info, HttpServletRequest request) {
 		return info.getMatchingCondition(request);
@@ -117,12 +118,14 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return (info1, info2) -> info1.compareTo(info2, request);
 	}
 
+	// eg1: request
 	@Override
 	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		request.removeAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		try {
-			return super.getHandlerInternal(request);
+			// eg1: request
+			return super.getHandlerInternal(request); // eg1: com.muse.springbootdemo.controller.DemoController#hello()
 		}
 		finally {
 			ProducesRequestCondition.clearMediaTypesAttribute(request);

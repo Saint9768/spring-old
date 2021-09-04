@@ -196,10 +196,13 @@ public class UrlPathHelper {
 	 * @return the resolved path
 	 * @since 5.3
 	 */
+	// eg1: request
 	public String resolveAndCacheLookupPath(HttpServletRequest request) {
+		// eg1: request
 		String lookupPath = getLookupPathForRequest(request);
+		// eg1: lookupPath="/hello"
 		request.setAttribute(PATH_ATTRIBUTE, lookupPath);
-		return lookupPath;
+		return lookupPath; // eg1: return "/hello"
 	}
 
 	/**
@@ -245,13 +248,17 @@ public class UrlPathHelper {
 	 * @see #getPathWithinServletMapping
 	 * @see #getPathWithinApplication
 	 */
+	// eg1: request
 	public String getLookupPathForRequest(HttpServletRequest request) {
-		String pathWithinApp = getPathWithinApplication(request);
-		// Always use full path within current servlet context?
+		// eg1: request
+		String pathWithinApp = getPathWithinApplication(request); // eg1: pathWithinApp="/hello"
+		// eg1: alwaysUseFullPath = true
+		/** 始终在当前servlet上下文中使用完整路径？*/
 		if (this.alwaysUseFullPath || skipServletPathDetermination(request)) {
+			// eg1: pathWithinApp="/hello"
 			return pathWithinApp;
 		}
-		// Else, use path within current servlet mapping if applicable
+		/** 否则，如果适用，请使用当前servlet映射中的路径 */
 		String rest = getPathWithinServletMapping(request, pathWithinApp);
 		if (StringUtils.hasLength(rest)) {
 			return rest;
@@ -349,13 +356,14 @@ public class UrlPathHelper {
 	 * @return the path within the web application
 	 * @see #getLookupPathForRequest
 	 */
+	// eg1: request
 	public String getPathWithinApplication(HttpServletRequest request) {
-		String contextPath = getContextPath(request);
-		String requestUri = getRequestUri(request);
-		String path = getRemainingPath(requestUri, contextPath, true);
+		String contextPath = getContextPath(request); // eg1: contextPath=""
+		String requestUri = getRequestUri(request); // eg1: requestUri="/hello"
+		String path = getRemainingPath(requestUri, contextPath, true); // eg1: return "/hello";
+		// eg1: path="/hello"
 		if (path != null) {
-			// Normal case: URI contains context path.
-			return (StringUtils.hasText(path) ? path : "/");
+			return (StringUtils.hasText(path) ? path : "/"); // eg1: return "/hello";
 		}
 		else {
 			return requestUri;
@@ -363,15 +371,15 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Match the given "mapping" to the start of the "requestUri" and if there
-	 * is a match return the extra part. This method is needed because the
-	 * context path and the servlet path returned by the HttpServletRequest are
-	 * stripped of semicolon content unlike the requestUri.
+	 * 将给定的“映射”与“requestUri”的开头匹配，如果匹配，则返回额外的部分。
+	 * 需要此方法是因为HttpServletRequest返回的上下文路径和servlet路径与requestUri不同，去掉了分号内容。
 	 */
+	// eg1: requestUri="/hello" mapping="" ignoreCase=true
 	@Nullable
 	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
 		int index1 = 0;
 		int index2 = 0;
+		// eg1: mapping.length()=0  (index2 < mapping.length())=false  不满足循环条件，所以不进行增强循环
 		for (; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
 			char c1 = requestUri.charAt(index1);
 			char c2 = mapping.charAt(index2);
@@ -387,16 +395,20 @@ public class UrlPathHelper {
 			}
 			return null;
 		}
+		// eg1：index2=0  mapping.length()=0  【不满足if条件】
 		if (index2 != mapping.length()) {
 			return null;
 		}
+		// eg1：index1=0  requestUri.length()=6  【不满足if条件】
 		else if (index1 == requestUri.length()) {
 			return "";
 		}
+		// eg1：requestUri.charAt(index1)='/'  【不满足if条件】
 		else if (requestUri.charAt(index1) == ';') {
 			index1 = requestUri.indexOf('/', index1);
 		}
-		return (index1 != -1 ? requestUri.substring(index1) : "");
+		// eg1：index1=0  requestUri.substring(index1)="/hello"
+		return (index1 != -1 ? requestUri.substring(index1) : ""); // eg1: return "/hello";
 	}
 
 	/**
@@ -429,12 +441,15 @@ public class UrlPathHelper {
 	 * @param request current HTTP request
 	 * @return the request URI
 	 */
+	// eg1: request
 	public String getRequestUri(HttpServletRequest request) {
 		String uri = (String) request.getAttribute(WebUtils.INCLUDE_REQUEST_URI_ATTRIBUTE);
+		// eg1: uri=null
 		if (uri == null) {
-			uri = request.getRequestURI();
+			uri = request.getRequestURI(); // eg1: uri="/hello"
 		}
-		return decodeAndCleanUriString(request, uri);
+		// eg1: request uri="/hello"
+		return decodeAndCleanUriString(request, uri); // eg1: return "/hello";
 	}
 
 	/**
@@ -445,16 +460,20 @@ public class UrlPathHelper {
 	 * @param request current HTTP request
 	 * @return the context path
 	 */
+	// eg1: request
 	public String getContextPath(HttpServletRequest request) {
 		String contextPath = (String) request.getAttribute(WebUtils.INCLUDE_CONTEXT_PATH_ATTRIBUTE);
+		// eg1: contextPath=null
 		if (contextPath == null) {
+			// contextPath=""
 			contextPath = request.getContextPath();
 		}
-		if (StringUtils.matchesCharacter(contextPath, '/')) {
-			// Invalid case, but happens for includes on Jetty: silently adapt it.
+		if (StringUtils.matchesCharacter(contextPath, '/')) { // eg1: false
+			/** Invalid case, but happens for includes on Jetty: silently adapt it. */
 			contextPath = "";
 		}
-		return decodeRequestString(request, contextPath);
+		// eg1: request contextPath=""
+		return decodeRequestString(request, contextPath); // eg1: return ""
 	}
 
 	/**
@@ -542,13 +561,14 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
+	 * 解码提供的URI字符串并去除“;”之后的任何无关部分
 	 */
+	// eg1: request uri="/hello"
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
 		uri = removeSemicolonContent(uri);
 		uri = decodeRequestString(request, uri);
 		uri = getSanitizedPath(uri);
-		return uri;
+		return uri; // eg1: uri="/hello"
 	}
 
 	/**
@@ -563,18 +583,23 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String, String)
 	 * @see java.net.URLDecoder#decode(String)
 	 */
+	// eg1: request source=""
 	public String decodeRequestString(HttpServletRequest request, String source) {
+		// eg1: urlDecode = true
 		if (this.urlDecode) {
-			return decodeInternal(request, source);
+			// eg1: request source=""
+			return decodeInternal(request, source); // eg1: return "";
 		}
 		return source;
 	}
 
+	// eg1: request source=""
 	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
-		String enc = determineEncoding(request);
+		String enc = determineEncoding(request); // eg1: enc="UTF-8"
 		try {
-			return UriUtils.decode(source, enc);
+			// eg1: source="" enc="UTF-8"
+			return UriUtils.decode(source, enc); // eg1: return "";
 		}
 		catch (UnsupportedCharsetException ex) {
 			if (logger.isWarnEnabled()) {
@@ -595,11 +620,15 @@ public class UrlPathHelper {
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */
+	// eg1: request
 	protected String determineEncoding(HttpServletRequest request) {
 		String enc = request.getCharacterEncoding();
+		// eg1: enc="UTF-8"
 		if (enc == null) {
+			/** defaultEncoding=WebUtils.DEFAULT_CHARACTER_ENCODING="ISO-8859-1" */
 			enc = getDefaultEncoding();
 		}
+		// eg1: enc="UTF-8"
 		return enc;
 	}
 

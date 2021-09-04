@@ -363,21 +363,25 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 
-	// Handler method lookup
 
 	/**
-	 * Look up a handler method for the given request.
+	 * 查找给定request的处理程序方法method
 	 */
+	// eg1: request
 	@Override
 	@Nullable
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
-		String lookupPath = initLookupPath(request);
+		String lookupPath = initLookupPath(request); // eg1: lookupPath="/hello"
+		/** 加读锁操作 */
 		this.mappingRegistry.acquireReadLock();
 		try {
+			// eg1: lookupPath="/hello" request
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
+			// eg1: handlerMethod=com.muse.springbootdemo.controller.DemoController#hello()
+			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null); // eg1: com.muse.springbootdemo.controller.DemoController#hello()
 		}
 		finally {
+			/** 解读锁操作 */
 			this.mappingRegistry.releaseReadLock();
 		}
 	}
@@ -391,18 +395,27 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handleMatch(Object, String, HttpServletRequest)
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
+	// eg1: lookupPath="/hello" request
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<>();
+
+		// eg1: lookupPath="/hello"
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(lookupPath);
+		// eg1： directPathMatches={GET [/hello]}
 		if (directPathMatches != null) {
+			// eg1： directPathMatches={GET [/hello]}  matches=new ArrayList<>()  request
 			addMatchingMappings(directPathMatches, matches, request);
 		}
+		// eg1: matches.size()=1
 		if (matches.isEmpty()) {
 			addMatchingMappings(this.mappingRegistry.getRegistrations().keySet(), matches, request);
 		}
+		// eg1: matches.isEmpty()=false
 		if (!matches.isEmpty()) {
+			// eg1: bestMatch={GET [/hello]}
 			Match bestMatch = matches.get(0);
+			// eg1: matches.size()=1 不满足if条件
 			if (matches.size() > 1) {
 				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 				matches.sort(comparator);
@@ -428,19 +441,25 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					}
 				}
 			}
+
+			// eg1: bestMatch.getHandlerMethod()=com.muse.springbootdemo.controller.DemoController#hello()
 			request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.getHandlerMethod());
 			handleMatch(bestMatch.mapping, lookupPath, request);
-			return bestMatch.getHandlerMethod();
+			return bestMatch.getHandlerMethod(); // eg1: com.muse.springbootdemo.controller.DemoController#hello()
 		}
 		else {
 			return handleNoMatch(this.mappingRegistry.getRegistrations().keySet(), lookupPath, request);
 		}
 	}
 
+	// eg1： mappings={GET [/hello]}  matches=new ArrayList<>()  request
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
+			// eg1： mappings={GET [/hello]}  request
 			T match = getMatchingMapping(mapping, request);
+			// RequestMappingInfo@8269 match={GET [/hello]}
 			if (match != null) {
+				// eg1: match={GET [/hello]}
 				matches.add(new Match(match, this.mappingRegistry.getRegistrations().get(mapping)));
 			}
 		}
@@ -587,9 +606,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		 * Return matches for the given URL path. Not thread-safe.
 		 * @see #acquireReadLock()
 		 */
+		// eg1: urlPath="/hello"
 		@Nullable
 		public List<T> getMappingsByDirectPath(String urlPath) {
-			return this.pathLookup.get(urlPath);
+			// eg1: pathLookup
+			//     "/success" -> {ArrayList@7201}  size = 1 {GET [/success]}
+			//     "/mapTest" -> {ArrayList@7203}  size = 1 {GET [/mapTest]}
+			//     "/hello" -> {ArrayList@6982}  size = 1 {GET [/hello]}
+			//     "/teacher" -> {ArrayList@7206}  size = 1 {POST [/teacher]}
+			//     "/student" -> {ArrayList@7208}  size = 4 {GET [/student]}、{POST [/student]}、{PUT [/student]}、{DELETE [/student]}
+			//     "/error" -> {ArrayList@7210}  size = 2 { [/error]}、{ [/error], produces [text/html]}
+			return this.pathLookup.get(urlPath); // eg1： return {GET [/hello]}
 		}
 
 		/**

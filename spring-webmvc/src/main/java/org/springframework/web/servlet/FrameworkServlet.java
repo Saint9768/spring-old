@@ -891,6 +891,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #doService
 	 * @see #doHead
 	 */
+	// eg1: request response
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
@@ -985,13 +986,14 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * <p>The actual event handling is performed by the abstract
 	 * {@link #doService} template method.
 	 */
-	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	// eg1: request response
+	protected final void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		long startTime = System.currentTimeMillis();
 		Throwable failureCause = null;
 
 		/** 构建语言环境 */
+		// eg1: previousLocaleContext: "zh_CN"
 		LocaleContext previousLocaleContext = LocaleContextHolder.getLocaleContext();
 		LocaleContext localeContext = buildLocaleContext(request);
 
@@ -1006,6 +1008,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
+			// eg1: request response
 			doService(request, response);
 		}
 		catch (ServletException | IOException ex) {

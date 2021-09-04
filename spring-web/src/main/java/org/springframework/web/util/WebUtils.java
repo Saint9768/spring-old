@@ -47,12 +47,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Miscellaneous utilities for web applications.
- * Used by various framework classes.
- *
- * @author Rod Johnson
- * @author Juergen Hoeller
- * @author Sebastien Deleuze
+ * Web应用程序的杂项实用程序。 被各种框架类使用。
  */
 public abstract class WebUtils {
 
@@ -495,8 +490,12 @@ public abstract class WebUtils {
 	 * <p>Checks the presence of the "javax.servlet.include.request_uri"
 	 * request attribute. Could check any request attribute that is only
 	 * present in an include request.
-	 * @param request current servlet request
-	 * @return whether the given request is an include request
+	 * 确定给定的请求是否包含请求，即不是来自外部的顶级HTTP请求。
+	 * 检查“javax.servlet.include.request_uri”请求属性是否存在。 可以检查仅存在于包含请求中的任何请求属性。
+	 *
+	 * isIncludeRequest(request)方法究竟是什么作用呢，要想明白这个问题，我们可以借助一条JSP的指令来理解：<jsp:incluede page="xxx.jsp"/> ，
+	 * 这条指令是指在一个页面中嵌套了另一个页面，那么我们知道JSP在运行期间是会被编译成相应的Servlet类来运行的，所以在Servlet中也会有类似的功能
+	 * 和调用语法，这就是RequestDispatch.include()方法。
 	 */
 	public static boolean isIncludeRequest(ServletRequest request) {
 		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);

@@ -166,8 +166,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * {@code PathPatternParser}, or {@code null}.
 	 * @since 5.3
 	 */
+	// eg1:
 	@Nullable
 	public PathPatternParser getPatternParser() {
+		// eg1: patternParser=null
 		return this.patternParser;
 	}
 
@@ -480,9 +482,10 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Return "true" if this {@code HandlerMapping} has been
 	 * {@link #setPatternParser enabled} to use parsed {@code PathPattern}s.
 	 */
+	// eg1:
 	@Override
 	public boolean usesPathPatterns() {
-		return getPatternParser() != null;
+		return getPatternParser() != null; // false
 	}
 
 	/**
@@ -492,36 +495,46 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
+	// eg1: request
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		/** 获取内部处理程序 */
+		// eg1: RequestMappingInfoHandlerMapping
 		Object handler = getHandlerInternal(request);
+		// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 		if (handler == null) {
 			handler = getDefaultHandler();
 		}
 		if (handler == null) {
 			return null;
 		}
-		// Bean name or resolved handler?
+		/** Bean 名称或已解析的处理程序？*/
+		// eg1: false
 		if (handler instanceof String) {
 			String handlerName = (String) handler;
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
-		// Ensure presence of cached lookupPath for interceptors and others
+		/** 确保存在拦截器和其他人的缓存查找路径 */
+		// eg1: ServletRequestPathUtils.hasCachedPath(request)=true
 		if (!ServletRequestPathUtils.hasCachedPath(request)) {
 			initLookupPath(request);
 		}
 
-		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
+		// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
+		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request); // eg1: executionChain=HandlerExecutionChain with [com.muse.springbootdemo.controller.DemoController#hello()] and 2 interceptors
 
+		// eg1: logger.isTraceEnabled()=false
 		if (logger.isTraceEnabled()) {
 			logger.trace("Mapped to " + handler);
 		}
+		// eg1: logger.isDebugEnabled()=false  request.getDispatcherType()=REQUEST
 		else if (logger.isDebugEnabled() && !DispatcherType.ASYNC.equals(request.getDispatcherType())) {
 			logger.debug("Mapped to " + executionChain.getHandler());
 		}
 
+		// eg1: hasCorsConfigurationSource(handler)=false  CorsUtils.isPreFlightRequest(request)=false
 		if (hasCorsConfigurationSource(handler) || CorsUtils.isPreFlightRequest(request)) {
 			CorsConfiguration config = getCorsConfiguration(handler, request);
 			if (getCorsConfigurationSource() != null) {
@@ -534,6 +547,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 
+		// eg1: executionChain=HandlerExecutionChain with [com.muse.springbootdemo.controller.DemoController#hello()] and 2 interceptors
 		return executionChain;
 	}
 
@@ -568,15 +582,17 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * method.
 	 * @since 5.3
 	 */
+	// eg1: request
 	protected String initLookupPath(HttpServletRequest request) {
+		// eg1：usesPathPatterns()=false
 		if (usesPathPatterns()) {
 			request.removeAttribute(UrlPathHelper.PATH_ATTRIBUTE);
 			RequestPath requestPath = ServletRequestPathUtils.getParsedRequestPath(request);
 			String lookupPath = requestPath.pathWithinApplication().value();
 			return UrlPathHelper.defaultInstance.removeSemicolonContent(lookupPath);
-		}
-		else {
-			return getUrlPathHelper().resolveAndCacheLookupPath(request);
+		} else {
+			// eg1：getUrlPathHelper()=new UrlPathHelper()
+			return getUrlPathHelper().resolveAndCacheLookupPath(request); // eg1: return "/hello"
 		}
 	}
 
@@ -600,10 +616,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the HandlerExecutionChain (never {@code null})
 	 * @see #getAdaptedInterceptors()
 	 */
+	// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
-				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
+		// eg1: handler instanceof HandlerExecutionChain=false
+		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ? (HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
+		// eg1: adaptedInterceptors
+		//     0 = {ConversionServiceExposingInterceptor@8401}
+		//     1 = {ResourceUrlProviderExposingInterceptor@8402}
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
@@ -612,9 +632,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				}
 			}
 			else {
+				// eg1.1: interceptor=ConversionServiceExposingInterceptor@8401
+				// eg1.2: interceptor=ResourceUrlProviderExposingInterceptor@8402
 				chain.addInterceptor(interceptor);
 			}
 		}
+		// eg1: chain=HandlerExecutionChain with [com.muse.springbootdemo.controller.DemoController#hello()] and 2 interceptors
 		return chain;
 	}
 

@@ -173,9 +173,10 @@ public abstract class ServletRequestPathUtils {
 	 * @param request the current request
 	 * @return whether a pre-resolved or pre-parsed path is available
 	 */
+	// eg1: request
 	public static boolean hasCachedPath(ServletRequest request) {
-		return (request.getAttribute(PATH_ATTRIBUTE) != null ||
-				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null);
+		return (request.getAttribute(PATH_ATTRIBUTE) != null || // eg1: request.getAttribute(PATH_ATTRIBUTE)=null
+				request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE) != null); // eg1: request.getAttribute(UrlPathHelper.PATH_ATTRIBUTE)="/hello"
 	}
 
 

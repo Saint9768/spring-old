@@ -196,6 +196,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 
+	// eg1: lastModifiedTimestamp=-1
 	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		return checkNotModified(null, lastModifiedTimestamp);
@@ -206,50 +207,62 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return checkNotModified(etag, -1);
 	}
 
+	// eg1: etag=null lastModifiedTimestamp=-1
 	@Override
 	public boolean checkNotModified(@Nullable String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
+		// eg1：notModified=false  response=ResponseFacade@6098 response.getStatus()=200
 		if (this.notModified || (response != null && HttpStatus.OK.value() != response.getStatus())) {
 			return this.notModified;
 		}
 
-		// Evaluate conditions in order of precedence.
-		// See https://tools.ietf.org/html/rfc7232#section-6
-
-		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+		// eg1：lastModifiedTimestamp=-1
+		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) { // eg1: validateIfUnmodifiedSince(lastModifiedTimestamp)=false
 			if (this.notModified && response != null) {
 				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
 			}
 			return this.notModified;
 		}
 
+		// eg1：etag=null
 		boolean validated = validateIfNoneMatch(etag);
+		// eg1: validated=false
 		if (!validated) {
+			// eg1：lastModifiedTimestamp=-1
 			validateIfModifiedSince(lastModifiedTimestamp);
 		}
 
-		// Update response
+		// eg1：response=ResponseFacade@6098
 		if (response != null) {
+			// eg1: isHttpGetOrHead=true
 			boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+			// eg1: notModified=false
 			if (this.notModified) {
 				response.setStatus(isHttpGetOrHead ?
 						HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
 			}
+			// eg1: isHttpGetOrHead=true
 			if (isHttpGetOrHead) {
+				// eg1：lastModifiedTimestamp=-1 不满足条件
 				if (lastModifiedTimestamp > 0 && parseDateValue(response.getHeader(HttpHeaders.LAST_MODIFIED)) == -1) {
 					response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModifiedTimestamp);
 				}
+				// eg1：etag=null 不满足条件
 				if (StringUtils.hasLength(etag) && response.getHeader(HttpHeaders.ETAG) == null) {
 					response.setHeader(HttpHeaders.ETAG, padEtagIfNecessary(etag));
 				}
 			}
 		}
 
+		// eg1: 返回notModified=false
 		return this.notModified;
 	}
 
+	// eg1：lastModifiedTimestamp=-1
 	private boolean validateIfUnmodifiedSince(long lastModifiedTimestamp) {
+		// eg1：lastModifiedTimestamp=-1
 		if (lastModifiedTimestamp < 0) {
+			// eg1 return
 			return false;
 		}
 		long ifUnmodifiedSince = parseDateHeader(HttpHeaders.IF_UNMODIFIED_SINCE);
@@ -261,8 +274,11 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return true;
 	}
 
+	// eg1：etag=null
 	private boolean validateIfNoneMatch(@Nullable String etag) {
+		// eg1：StringUtils.hasLength(etag)=false
 		if (!StringUtils.hasLength(etag)) {
+			// eg1：return
 			return false;
 		}
 
@@ -307,8 +323,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return "\"" + etag + "\"";
 	}
 
+	// eg1：lastModifiedTimestamp=-1
 	private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp < 0) {
+			// eg1：return
 			return false;
 		}
 		long ifModifiedSince = parseDateHeader(HttpHeaders.IF_MODIFIED_SINCE);

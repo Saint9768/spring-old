@@ -371,30 +371,37 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * patterns on top.
 	 * @return a new instance in case of a match; or {@code null} otherwise
 	 */
+	// eg1: request
 	@Override
 	@Nullable
 	public RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(request);
+		// eg1: methods=[GET]
 		if (methods == null) {
 			return null;
 		}
 		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(request);
+		// eg1: params=[]
 		if (params == null) {
 			return null;
 		}
 		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(request);
+		// eg1: headers=[]
 		if (headers == null) {
 			return null;
 		}
 		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(request);
+		// eg1: consumes=[]
 		if (consumes == null) {
 			return null;
 		}
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
+		// eg1: produces=[]
 		if (produces == null) {
 			return null;
 		}
 		PathPatternsRequestCondition pathPatterns = null;
+		// eg1: pathPatternsCondition=null
 		if (this.pathPatternsCondition != null) {
 			pathPatterns = this.pathPatternsCondition.getMatchingCondition(request);
 			if (pathPatterns == null) {
@@ -402,13 +409,16 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			}
 		}
 		PatternsRequestCondition patterns = null;
+		// eg1: patternsCondition=[/hello]
 		if (this.patternsCondition != null) {
 			patterns = this.patternsCondition.getMatchingCondition(request);
+			// eg1: patterns=[/hello]
 			if (patterns == null) {
 				return null;
 			}
 		}
 		RequestConditionHolder custom = this.customConditionHolder.getMatchingCondition(request);
+		// eg1: custom=[]
 		if (custom == null) {
 			return null;
 		}

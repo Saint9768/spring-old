@@ -920,13 +920,16 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Exposes the DispatcherServlet-specific request attributes and delegates to {@link #doDispatch}
 	 * for the actual dispatching.
 	 */
+	// eg1: request response
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		logRequest(request);
 
-		// Keep a snapshot of the request attributes in case of an include,
-		// to be able to restore the original attributes after the include.
+		// Keep a snapshot of the request attributes in case of an include, to be able to restore the original attributes after the include.
 		Map<String, Object> attributesSnapshot = null;
+
+		/** 是否是内嵌请求，即：<jsp:incluede page="xxx.jsp"/> */
+		// eg1: WebUtils.isIncludeRequest(request)=false
 		if (WebUtils.isIncludeRequest(request)) {
 			attributesSnapshot = new HashMap<>();
 			Enumeration<?> attrNames = request.getAttributeNames();
@@ -944,8 +947,10 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
 		request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
 
+		// eg1: flashMapManager=SessionFlashMapManager@6110 不为空
 		if (this.flashMapManager != null) {
 			FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
+			// eg1: inputFlashMap=null
 			if (inputFlashMap != null) {
 				request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
 			}
@@ -954,12 +959,14 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		RequestPath previousRequestPath = null;
+		// eg1: parseRequestPath=false
 		if (this.parseRequestPath) {
 			previousRequestPath = (RequestPath) request.getAttribute(ServletRequestPathUtils.PATH_ATTRIBUTE);
 			ServletRequestPathUtils.parseAndCache(request);
 		}
 
 		try {
+			// eg1: request response
 			doDispatch(request, response);
 		}
 		finally {
@@ -1020,11 +1027,13 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param response current HTTP response
 	 * @throws Exception in case of any kind of processing failure
 	 */
+	// eg1: request response
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
 		boolean multipartRequestParsed = false;
 
+		/** web异步处理管理类 */
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
@@ -1032,25 +1041,31 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
+				/** 检测上传请求 */
 				processedRequest = checkMultipart(request);
+				// eg1: multipartRequestParsed = false
 				multipartRequestParsed = (processedRequest != request);
 
-				// Determine handler for the current request.
+				/** 确定当前请求的映射处理类——从5个里选择 */
 				mappedHandler = getHandler(processedRequest);
+				// eg1: mappedHandler=HandlerExecutionChain with [com.muse.springbootdemo.controller.DemoController#hello()] and 2 interceptors
 				if (mappedHandler == null) {
 					noHandlerFound(processedRequest, response);
 					return;
 				}
 
-				// Determine handler adapter for the current request.
-				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+				/** 确定当前请求的处理程序适配器——从4个里选择 */
+				// eg1: mappedHandler.getHandler()=com.muse.springbootdemo.controller.DemoController#hello()
+				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler()); // eg1: ha=RequestMappingHandlerAdapter@7690
 
-				// Process last-modified header, if supported by the handler.
+				/** 如果handler支持，则处理最后修改的header信息 */
 				String method = request.getMethod();
+				// eg1: method="GET"
 				boolean isGet = HttpMethod.GET.matches(method);
 				if (isGet || HttpMethod.HEAD.matches(method)) {
 					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
-					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+					// eg1: lastModified=-1
+					if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) { // eg1: false
 						return;
 					}
 				}
@@ -1059,7 +1074,8 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				// Actually invoke the handler.
+				/** 实际调用处理程序 */
+				// eg1: ha=AbstractHandlerMethodAdapter
 				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1252,10 +1268,19 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	@Nullable
 	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// eg1: handlerMappings包含如下5个映射器
+		//      0 = {RequestMappingHandlerMapping@6920}
+		//      1 = {BeanNameUrlHandlerMapping@7181}
+		//      2 = {RouterFunctionMapping@7182}
+		//      3 = {SimpleUrlHandlerMapping@7183}
+		//      4 = {WelcomePageHandlerMapping@7184}
 		if (this.handlerMappings != null) {
 			for (HandlerMapping mapping : this.handlerMappings) {
+				// eg1：mapping=RequestMappingHandlerMapping
 				HandlerExecutionChain handler = mapping.getHandler(request);
+				// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 				if (handler != null) {
+					// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 					return handler;
 				}
 			}
@@ -1287,10 +1312,17 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @param handler the handler object to find an adapter for
 	 * @throws ServletException if no HandlerAdapter can be found for the handler. This is a fatal error.
 	 */
+	// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 	protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
+		// eg1: handlerAdapters包含如下4个适配器
+		//      0 = {RequestMappingHandlerAdapter@7690}
+		//      1 = {HandlerFunctionAdapter@7691}
+		//      2 = {HttpRequestHandlerAdapter@7692}
+		//      3 = {SimpleControllerHandlerAdapter@7693}
 		if (this.handlerAdapters != null) {
 			for (HandlerAdapter adapter : this.handlerAdapters) {
 				if (adapter.supports(handler)) {
+					// eg1: adapter=RequestMappingHandlerAdapter@7690
 					return adapter;
 				}
 			}

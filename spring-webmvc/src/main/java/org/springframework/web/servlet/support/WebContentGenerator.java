@@ -369,19 +369,21 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 
 	/**
-	 * Check the given request for supported methods and a required session, if any.
-	 * @param request current HTTP request
-	 * @throws ServletException if the request cannot be handled because a check failed
-	 * @since 4.2
+	 * 检查给定的请求以获取支持的方法和所需的会话（如果有）。
 	 */
+	// eg1: request
 	protected final void checkRequest(HttpServletRequest request) throws ServletException {
-		// Check whether we should support the request method.
+		/** 检查我们是否应该支持请求方法 */
+		// eg1: method=GET
 		String method = request.getMethod();
+
+		// eg1： supportedMethods=null
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
 			throw new HttpRequestMethodNotSupportedException(method, this.supportedMethods);
 		}
 
-		// Check whether a session is required.
+		/** 检查是否需要会话 */
+		// eg1: requireSession=false
 		if (this.requireSession && request.getSession(false) == null) {
 			throw new HttpSessionRequiredException("Pre-existing session required but none found");
 		}

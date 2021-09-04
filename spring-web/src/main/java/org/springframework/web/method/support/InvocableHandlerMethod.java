@@ -130,15 +130,18 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @see #getMethodArgumentValues
 	 * @see #doInvoke
 	 */
+	// eg1: providedArgs.length=0
 	@Nullable
 	public Object invokeForRequest(NativeWebRequest request, @Nullable ModelAndViewContainer mavContainer,
 			Object... providedArgs) throws Exception {
 
+		/** 获取调用方法的入参，比如：参数所在的位置，使用的注解是什么，入参类型是什么，等等 */
 		Object[] args = getMethodArgumentValues(request, mavContainer, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Arguments: " + Arrays.toString(args));
 		}
-		return doInvoke(args);
+		/** doInvoke(args)方法，利用反射，调用Controller中的响应方法 */
+		return doInvoke(args); // eg1：
 	}
 
 	/**

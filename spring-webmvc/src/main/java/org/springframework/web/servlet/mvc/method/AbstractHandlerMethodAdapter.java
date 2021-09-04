@@ -79,6 +79,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	/**
 	 * This implementation expects the handler to be an {@link HandlerMethod}.
 	 */
+	// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 	@Override
 	@Nullable
 	public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)

@@ -99,20 +99,16 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Extension of {@link AbstractHandlerMethodAdapter} that supports
- * {@link RequestMapping @RequestMapping} annotated {@link HandlerMethod HandlerMethods}.
- *
- * <p>Support for custom argument and return value types can be added via
- * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers},
- * or alternatively, to re-configure all argument and return value types,
- * use {@link #setArgumentResolvers} and {@link #setReturnValueHandlers}.
- *
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @author Sebastien Deleuze
- * @since 3.1
- * @see HandlerMethodArgumentResolver
- * @see HandlerMethodReturnValueHandler
+ * AbstractHandlerMethodAdapter的扩展，支持@RequestMapping注释的HandlerMethods。
+ * 可以通过
+ * setCustomArgumentResolvers(java.util.List<org.springframework.web.method.support.HandlerMethodArgumentResolver>)
+ * 和
+ * setCustomReturnValueHandlers(java.util.List<org.springframework.web.method.support.HandlerMethodReturnValueHandler>)，
+ * 或者
+ * 重新配置所有参数和返回值类型，使用
+ * setArgumentResolvers(java.util.List<org.springframework.web.method.support.HandlerMethodArgumentResolver>)
+ * 和
+ * setReturnValueHandlers(java.util.List <org.springframework.web.method.support.HandlerMethodReturnValueHandler>)。
  */
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
@@ -782,14 +778,17 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return true;
 	}
 
+	// eg1: handlerMethod=com.muse.springbootdemo.controller.DemoController#hello()
 	@Override
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ModelAndView mav;
+		// eg1: request
 		checkRequest(request);
 
-		// Execute invokeHandlerMethod in synchronized block if required.
+		/** 如果需要，在同步块中执行invokeHandlerMethod*/
+		// eg1: synchronizeOnSession=false
 		if (this.synchronizeOnSession) {
 			HttpSession session = request.getSession(false);
 			if (session != null) {
@@ -799,12 +798,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				}
 			}
 			else {
-				// No HttpSession available -> no mutex necessary
+				/** 没有可用的HttpSession -> 不需要互斥量 */
 				mav = invokeHandlerMethod(request, response, handlerMethod);
 			}
 		}
 		else {
-			// No synchronization on session demanded at all...
+			/** 根本不需要会话同步 */
+			// eg1: handlerMethod=com.muse.springbootdemo.controller.DemoController#hello()
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
@@ -842,11 +842,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 	/**
-	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
-	 * if view resolution is required.
-	 * @since 4.2
-	 * @see #createInvocableHandlerMethod(HandlerMethod)
+	 * 如果需要视图解析，则调用RequestMapping处理程序方法准备ModelAndView。
 	 */
+	// eg1: handlerMethod=com.muse.springbootdemo.controller.DemoController#hello()
 	@Nullable
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
@@ -856,30 +854,59 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
+			/** 创建并设置ServletInvocableHandlerMethod */
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+			// eg1: argumentResolvers一共27个参数解析器
+			// 		0={RequestParamMethodArgumentResolver@8608} 		1={RequestParamMapMethodArgumentResolver@8609}
+			// 		2={PathVariableMethodArgumentResolver@8610} 		3={PathVariableMapMethodArgumentResolver@8611}
+			// 		4={MatrixVariableMethodArgumentResolver@8612} 		5={MatrixVariableMapMethodArgumentResolver@8613}
+			// 		6={ServletModelAttributeMethodProcessor@8614} 		7={RequestResponseBodyMethodProcessor@8615}
+			// 		8={RequestPartMethodArgumentResolver@8616} 			9={RequestHeaderMethodArgumentResolver@8617}
+			// 		10={RequestHeaderMapMethodArgumentResolver@8618} 	11={ServletCookieValueMethodArgumentResolver@8619}
+			// 		12={ExpressionValueMethodArgumentResolver@8620} 	13={SessionAttributeMethodArgumentResolver@8621}
+			// 		14={RequestAttributeMethodArgumentResolver@8622} 	15={ServletRequestMethodArgumentResolver@8623}
+			// 		16={ServletResponseMethodArgumentResolver@8624} 	17={HttpEntityMethodProcessor@8625}
+			// 		18={RedirectAttributesMethodArgumentResolver@8626} 	19={ModelMethodProcessor@8627}
+			// 		20={MapMethodProcessor@8628} 						21={ErrorsMethodArgumentResolver@8629}
+			// 		22={SessionStatusMethodArgumentResolver@8630} 		23={UriComponentsBuilderMethodArgumentResolver@8631}
+			// 		24={PrincipalMethodArgumentResolver@8632} 			25={RequestParamMethodArgumentResolver@8633}
+			// 		26={ServletModelAttributeMethodProcessor@8634}
 			if (this.argumentResolvers != null) {
 				invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 			}
+			// eg1: returnValueHandlers一共15个结果处理器
+			// 		0={ModelAndViewMethodReturnValueHandler@8640} 		1={ModelMethodProcessor@8641}
+			// 		2={ViewMethodReturnValueHandler@8642} 				3={ResponseBodyEmitterReturnValueHandler@8643}
+			// 		4={StreamingResponseBodyReturnValueHandler@8644} 	5={HttpEntityMethodProcessor@8645}
+			// 		6={HttpHeadersReturnValueHandler@8646} 				7={CallableMethodReturnValueHandler@8647}
+			// 		8={DeferredResultMethodReturnValueHandler@8648} 	9={AsyncTaskMethodReturnValueHandler@8649}
+			// 		10={ServletModelAttributeMethodProcessor@8650} 		11={RequestResponseBodyMethodProcessor@8651}
+			// 		12={ViewNameMethodReturnValueHandler@8652} 			13={MapMethodProcessor@8653}
+			// 		14={ServletModelAttributeMethodProcessor@8654}
 			if (this.returnValueHandlers != null) {
 				invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 			}
 			invocableMethod.setDataBinderFactory(binderFactory);
 			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 
+			/** 创建并设置"ModelAndView容器" */
 			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
 			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
+			/** 创建并设置"异步web请求" */
 			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 			asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
+			/** 创建并设置"web异步管理器" */
 			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 			asyncManager.setTaskExecutor(this.taskExecutor);
 			asyncManager.setAsyncWebRequest(asyncWebRequest);
 			asyncManager.registerCallableInterceptors(this.callableInterceptors);
 			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
+			// eg1：asyncManager.hasConcurrentResult()=false
 			if (asyncManager.hasConcurrentResult()) {
 				Object result = asyncManager.getConcurrentResult();
 				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
@@ -891,6 +918,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
+			/** 这块是真正执行请求处理的地方 */
+			// eg1:
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
