@@ -35,12 +35,10 @@ import org.springframework.lang.Nullable;
  * Other applications can expose theirs too, to make classes like
  * MessageSourceAccessor automatically use that Locale.
  *
- * @author Juergen Hoeller
- * @author Nicholas Williams
- * @since 1.2
- * @see LocaleContext
- * @see org.springframework.context.support.MessageSourceAccessor
- * @see org.springframework.web.servlet.DispatcherServlet
+ * 简单的holder类将LocaleContext实例和当前线程进行相关联。如果可继承标志设置为true，则LocaleContext将由当前线程产生的任何子线程继承。
+ * 在必要时用作Spring中当前Locale的中央持有者：例如，在MessageSourceAccessor中。
+ * DispatcherServlet在此处自动公开其当前的Locale。
+ * 其他应用程序也可以公开它们的应用程序，以使MessageSourceAccessor等类自动使用该语言环境。
  */
 public final class LocaleContextHolder {
 

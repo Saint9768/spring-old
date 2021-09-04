@@ -21,17 +21,13 @@ import java.util.function.Supplier;
 import org.springframework.lang.Nullable;
 
 /**
- * Step recording metrics about a particular phase or action happening during the {@link ApplicationStartup}.
+ * Step记录有关 {@link ApplicationStartup} 期间发生的特定阶段或操作的指标。
  *
- * <p>The lifecycle of a {@code StartupStep} goes as follows:
- * <ol>
- * <li>the step is created and starts by calling {@link ApplicationStartup#start(String) the application startup}
- * and is assigned a unique {@link StartupStep#getId() id}.
- * <li>we can then attach information with {@link Tags} during processing
- * <li>we then need to mark the {@link #end()} of the step
- * </ol>
- *
- * <p>Implementations can track the "execution time" or other metrics for steps.
+ * {@code StartupStep} 的生命周期如下所示:
+ * 该步骤是通过调用 {@link ApplicationStartup#start(String) the application startup} 来创建和启动的，并被分配一个唯一的 {@link StartupStep#getId() id}。
+ * 然后我们可以在处理过程中使用 {@link Tags} 附加信息
+ * 然后我们需要标记步骤的 {@link #end()}
+ * 它的实现类，可以跟踪“执行时间”或步骤的其他指标。
  *
  * @author Brian Clozel
  * @since 5.3
@@ -39,15 +35,14 @@ import org.springframework.lang.Nullable;
 public interface StartupStep {
 
 	/**
-	 * Return the name of the startup step.
-	 * <p>A step name describes the current action or phase. This technical
-	 * name should be "." namespaced and can be reused to describe other instances of
-	 * similar steps during application startup.
+	 * 返回启动步骤的名称
+	 * 步骤名称描述当前操作或阶段。
+	 * 此技术名称应为“.”命名空间，可以重用来描述应用程序启动期间类似步骤的其他实例。
 	 */
 	String getName();
 
 	/**
-	 * Return the unique id for this step within the application startup.
+	 * 在应用程序启动中返回此步骤的唯一ID
 	 */
 	long getId();
 

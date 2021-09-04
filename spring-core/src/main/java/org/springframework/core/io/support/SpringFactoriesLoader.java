@@ -40,24 +40,13 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * General purpose factory loading mechanism for internal use within the framework.
+ * Spring框架内部使用的通用工厂加载机制。
  *
- * <p>{@code SpringFactoriesLoader} {@linkplain #loadFactories loads} and instantiates
- * factories of a given type from {@value #FACTORIES_RESOURCE_LOCATION} files which
- * may be present in multiple JAR files in the classpath. The {@code spring.factories}
- * file must be in {@link Properties} format, where the key is the fully qualified
- * name of the interface or abstract class, and the value is a comma-separated list of
- * implementation class names. For example:
- *
- * <pre class="code">example.MyService=example.MyServiceImpl1,example.MyServiceImpl2</pre>
- *
- * where {@code example.MyService} is the name of the interface, and {@code MyServiceImpl1}
- * and {@code MyServiceImpl2} are two implementations.
- *
- * @author Arjen Poutsma
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @since 3.2
+ * SpringFactoriesLoader.loadFactories(...)从“META-INF/spring.factories”文件加载和实例化给定类型的工厂，这些文件可能存在于类路径中
+ * 的多个JAR文件中。spring.factories文件必须是Properties格式，其中key是接口或抽象类的完全限定名称，value是逗号分隔的实现类名称列表。
+ * 例如：
+ *    example.MyService=example.MyServiceImpl1,example.MyServiceImpl2
+ * 其中example.MyService是接口名称，MyServiceImpl1和MyServiceImpl2是两个实现。
  */
 public final class SpringFactoriesLoader {
 
@@ -77,21 +66,11 @@ public final class SpringFactoriesLoader {
 	private SpringFactoriesLoader() {
 	}
 
-
 	/**
-	 * Load and instantiate the factory implementations of the given type from
-	 * {@value #FACTORIES_RESOURCE_LOCATION}, using the given class loader.
-	 * <p>The returned factories are sorted through {@link AnnotationAwareOrderComparator}.
-	 * <p>If a custom instantiation strategy is required, use {@link #loadFactoryNames}
-	 * to obtain all registered factory names.
-	 * <p>As of Spring Framework 5.3, if duplicate implementation class names are
-	 * discovered for a given factory type, only one instance of the duplicated
-	 * implementation type will be instantiated.
-	 * @param factoryType the interface or abstract class representing the factory
-	 * @param classLoader the ClassLoader to use for loading (can be {@code null} to use the default)
-	 * @throws IllegalArgumentException if any factory implementation class cannot
-	 * be loaded or if an error occurs while instantiating any factory
-	 * @see #loadFactoryNames
+	 * 使用给定的类加载器从“META-INF/spring.factories”加载并实例化给定类型的工厂实现。
+	 * 返回的工厂通过 AnnotationAwareOrderComparator 进行排序。
+	 * 如果需要自定义实例化策略，请使用 loadFactoryNames(java.lang.Class<?>, java.lang.ClassLoader) 获取所有已注册的工厂名称。
+	 * 从 Spring Framework 5.3 开始，如果为给定的工厂类型发现重复的实现类名称，则只会实例化重复的实现类型的一个实例。
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryType, @Nullable ClassLoader classLoader) {
 		Assert.notNull(factoryType, "'factoryType' must not be null");
@@ -111,35 +90,43 @@ public final class SpringFactoriesLoader {
 		return result;
 	}
 
-	// eg1: type=Bootstrapper.class  classLoader=ClassLoaders$AppClassLoader@1967
 	/**
-	 * 查找指定入参的factoryType类名字，是否在所有的jar包依赖的META-INF/spring.factories的配置文件中有配置了的内容。
+	 * 查找指定入参的factoryType所配置的类名集合，即：是否在所有的jar包依赖的META-INF/spring.factories的配置文件中有配置的内容。
 	 * 如果有，则返回spring.factories文件中配置的对应等号"="右边的的类名列表；
 	 * 如果没有，则返回Collections.emptyList()
 	 */
+	// eg1: factoryType=Bootstrapper.class  classLoader=ClassLoaders$AppClassLoader@1967
 	public static List<String> loadFactoryNames(Class<?> factoryType, @Nullable ClassLoader classLoader) {
+		/** 首先：获得类加载器 */
 		ClassLoader classLoaderToUse = classLoader;
 		// eg1: classLoaderToUse=ClassLoaders$AppClassLoader@1967
 		if (classLoaderToUse == null) {
 			classLoaderToUse = SpringFactoriesLoader.class.getClassLoader();
 		}
 
+		/** 其次：获得factoryType的全路径名 */
 		// eg1: factoryTypeName="org.springframework.boot.Bootstrapper"
 		String factoryTypeName = factoryType.getName();
 
 
-		// eg1: classLoaderToUse=ClassLoaders$AppClassLoader@1967  factoryTypeName="org.springframework.boot.Bootstrapper"
 		/**
+		 * 最后：
+		 * 遍历所有jar包下【META-INF/spring.factories】路径文件，将配置文件信息拼装为Map<String, List<String>>数据格式进行返回。
+		 * 然后，去获取是否有key等于factoryTypeName的配置。如果有，那么从map中获取对应的value值。如果没有，则返回Collections.emptyList()
+		 *
 		 * MAP.getOrDefault(Object key, V defaultValue):
 		 * * 如果能从map中获得key对应的value值，则返回该value；
 		 * * 如果map中不存在指定的key值时，则返回defaultValue；
 		 */
+		// eg1: classLoaderToUse=ClassLoaders$AppClassLoader@1967  factoryTypeName="org.springframework.boot.Bootstrapper"
 		return loadSpringFactories(classLoaderToUse).getOrDefault(factoryTypeName, Collections.emptyList()); // eg1：返回值为Collections.emptyList()
 	}
 
 
 	// eg1: classLoader=ClassLoaders$AppClassLoader@1967
 	/**
+	 * 解析所有加载的jar包中具有META-INF/spring.factories配置文件的配置内容，并组装为Map<String, List<String>>数据结构，方法返回。
+	 *
 	 * 处理流程：
 	 * 1> 读取所有依赖jar包中，每一个存在META-INF/spring.factories的配置文件内容;
 	 * 2> 将配置文件中的内容维护到Map<String, List<String>> result中，如果key相同，则value取合集;
@@ -147,6 +134,7 @@ public final class SpringFactoriesLoader {
 	 * 4> 将result作为返回值返回。
 	 */
 	private static Map<String, List<String>> loadSpringFactories(ClassLoader classLoader) {
+		/** 首先：去缓存中，查询是否有入参classLoader对应的配置信息，如果存在，则表明服务之前解析过配置文件。如果不存在，则进行解析操作 */
 		// eg1: cache.size()=0
 		Map<String, List<String>> result = cache.get(classLoader);
 		// eg1: result=null
@@ -156,6 +144,7 @@ public final class SpringFactoriesLoader {
 
 		result = new HashMap<>();
 		try {
+			/** 其次：获得所有依赖jar包中，具有META-INF/spring.factories配置文件的jar文件URI，并依次进行遍历 */
 			// eg1: FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";
 			Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);
 			while (urls.hasMoreElements()) {
@@ -168,8 +157,10 @@ public final class SpringFactoriesLoader {
 				// eg1-2: 通过url获得资源resource，并将spring-boot-autoconfigure-2.5.1.jar包下spring.factories文件中的配置信息，加载到properties中。共计9个配置项
 				// eg1-3: 通过url获得资源resource，并将spring-beans-5.3.8.jar包下spring.factories文件中的配置信息，加载到properties中。共计1个配置项
 				UrlResource resource = new UrlResource(url);
+				/** 第三: 将spring.factories配置的内容转化成properties实例 */
 				Properties properties = PropertiesLoaderUtils.loadProperties(resource);
 
+				/** 最后，遍历properties实例，将key和value维护到Map<String, List<String>> result数据结构中 */
 				// eg1-1:【仅以第一次循环为例】
 				for (Map.Entry<?, ?> entry : properties.entrySet()) {
 					// eg1-1-1: factoryTypeName="org.springframework.boot.diagnostics.FailureAnalysisReporter"
@@ -193,6 +184,7 @@ public final class SpringFactoriesLoader {
 
 			/**
 			 * Replace all lists with unmodifiable lists containing unique elements
+			 * 把result结果中的value值中集合去重，并且包装为不可修改的list
 			 *
 			 * collectingAndThen(Collector<T,A,R> downstream, Function<R,RR> finisher)方法的使用:
 			 * * 先进行结果集的收集，然后将收集到的结果集进行下一步的处理；即：就是把第一个参数downstream的结果，交给第二个参数Function

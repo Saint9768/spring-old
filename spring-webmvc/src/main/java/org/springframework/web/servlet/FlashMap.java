@@ -25,26 +25,18 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A FlashMap provides a way for one request to store attributes intended for
- * use in another. This is most commonly needed when redirecting from one URL
- * to another -- e.g. the Post/Redirect/Get pattern. A FlashMap is saved before
- * the redirect (typically in the session) and is made available after the
- * redirect and removed immediately.
+ * FlashMap为一个请求提供了一种存储用于另一个请求的属性的方法。当从一个URL重定向到另一个URL时，这是最常用的——例如:发布/重定向/获取模式。
+ * FlashMap在重定向之前保存（通常在会话中），在重定向之后可用并立即删除。
+ * 可以使用请求路径和请求参数来设置FlashMap，以帮助识别目标请求。 如果没有此信息，FlashMap可用于下一个请求，该请求可能是也可能不是预期的接收者。
+ * 在重定向时，目标URL是已知的，FlashMap可以使用该信息进行更新。 当使用org.springframework.web.servlet.view.RedirectView时，这是自动完成的。
  *
- * <p>A FlashMap can be set up with a request path and request parameters to
- * help identify the target request. Without this information, a FlashMap is
- * made available to the next request, which may or may not be the intended
- * recipient. On a redirect, the target URL is known and a FlashMap can be
- * updated with that information. This is done automatically when the
- * {@code org.springframework.web.servlet.view.RedirectView} is used.
+ * 注意：带注释的控制器通常不会直接使用FlashMap。 有关在带注释的控制器中使用flash属性的概述，请参阅org.springframework.web.servlet.mvc.support
+ * .RedirectAttributes。
  *
- * <p>Note: annotated controllers will usually not use FlashMap directly.
- * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}
- * for an overview of using flash attributes in annotated controllers.
- *
- * @author Rossen Stoyanchev
- * @since 3.1
- * @see FlashMapManager
+ * 首先先讲解FlashMap，FlashMapManager存在的价值；做过Web开发的人都知道，后端有请求转发和请求重定向两种方式，请求转发的时候Request是同一个，
+ * 所以可以在转发后拿到转发前的所有信息；但是重定向后Request是新的，如果需要在重定向前设置一些信息，重定向后获取使用应该怎么办法呢？这就是
+ * FlashMap存在的意义，FlashMap借助session重定向前通过FlashMapManager将信息放入FlashMap,重定向后再借助FlashMapManager从session中找
+ * 到重定向后需要的FalshMap。
  */
 @SuppressWarnings("serial")
 public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {

@@ -136,10 +136,10 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 		multicastEvent(event, resolveDefaultEventType(event));
 	}
 
-	// eg1: event=ApplicationStartingEvent@47d90b9e  eventType=ResolvableType@2566
 	/**
 	 * 广播事件
 	 */
+	// eg1: event=ApplicationStartingEvent@47d90b9e  eventType=ResolvableType@2566
 	@Override
 	public void multicastEvent(final ApplicationEvent event, @Nullable ResolvableType eventType) {
 		// eg1: type=ResolvableType@2566

@@ -24,23 +24,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * Holder class to expose the web request in the form of a thread-bound
- * {@link RequestAttributes} object. The request will be inherited
- * by any child threads spawned by the current thread if the
- * {@code inheritable} flag is set to {@code true}.
+ * 项目中除了Controller能够接收到请求对象HttpServletRequest和HttpServletResponse外，如果需要在service层使用以上请求和/或响应对象，
+ * 如果直接从Controller传递过service层感觉太麻烦，而且耦合度太高；
+ * 那么有什么方式可以优雅的解决该问题么？
+ * SpringMvc提供了RequestContextHolder对象!
  *
- * <p>Use {@link RequestContextListener} or
- * {@link org.springframework.web.filter.RequestContextFilter} to expose
- * the current web request. Note that
- * {@link org.springframework.web.servlet.DispatcherServlet}
- * already exposes the current request by default.
- *
- * @author Juergen Hoeller
- * @author Rod Johnson
- * @since 2.0
- * @see RequestContextListener
- * @see org.springframework.web.filter.RequestContextFilter
- * @see org.springframework.web.servlet.DispatcherServlet
+ * Holder类以线程绑定(thread-bound)的RequestAttributes对象的形式公开Web请求(request)。
+ * 如果可继承标志设置为true，则请求将由当前线程产生的任何子线程继承。
+ * 使用RequestContextListener或RequestContextFilter来公开当前的Web请求。
+ * 注意DispatcherServlet默认已经暴露了当前的请求。
  */
 public abstract class RequestContextHolder  {
 

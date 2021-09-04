@@ -77,29 +77,20 @@ import org.springframework.util.StringUtils;
 public final class CachedIntrospectionResults {
 
 	/**
-	 * System property that instructs Spring to use the {@link Introspector#IGNORE_ALL_BEANINFO}
-	 * mode when calling the JavaBeans {@link Introspector}: "spring.beaninfo.ignore", with a
-	 * value of "true" skipping the search for {@code BeanInfo} classes (typically for scenarios
-	 * where no such classes are being defined for beans in the application in the first place).
-	 * <p>The default is "false", considering all {@code BeanInfo} metadata classes, like for
-	 * standard {@link Introspector#getBeanInfo(Class)} calls. Consider switching this flag to
-	 * "true" if you experience repeated ClassLoader access for non-existing {@code BeanInfo}
-	 * classes, in case such access is expensive on startup or on lazy loading.
-	 * <p>Note that such an effect may also indicate a scenario where caching doesn't work
-	 * effectively: Prefer an arrangement where the Spring jars live in the same ClassLoader
-	 * as the application classes, which allows for clean caching along with the application's
-	 * lifecycle in any case. For a web application, consider declaring a local
-	 * {@link org.springframework.web.util.IntrospectorCleanupListener} in {@code web.xml}
-	 * in case of a multi-ClassLoader layout, which will allow for effective caching as well.
-	 * @see Introspector#getBeanInfo(Class, int)
+	 * 指示Spring在调用JavaBeans Introspector时使用Introspector.IGNORE_ALL_BEANINFO模式的系统属性：“spring.beaninfo.ignore”，
+	 * 值为“true”时，跳过对BeanInfo类的搜索（通常用于未定义此类类的情况）首先用于应用程序中的bean）。
+	 * 默认值为“false”，考虑到所有BeanInfo元数据类，例如标准 Introspector.getBeanInfo(Class) 调用。如果您遇到对不存在的BeanInfo类的
+	 * 重复ClassLoader访问，请考虑将此标志切换为“true”，以防此类访问在启动或延迟加载时开销很大。
+	 *
+	 * 请注意，这种效果也可能表明缓存无法有效工作的场景：
+	 * 首选一种安排，其中Spring jar与应用程序类位于同一个ClassLoader中，这样在任何情况下都允许清理缓存以及应用程序的生命周期。
+	 * 对于web应用程序，考虑在web.xml中声明一个本地IntrospectorCleanupListener以防多类加载器布局，这也将允许有效缓存。
 	 */
 	public static final String IGNORE_BEANINFO_PROPERTY_NAME = "spring.beaninfo.ignore";
 
 	private static final PropertyDescriptor[] EMPTY_PROPERTY_DESCRIPTOR_ARRAY = {};
 
-
-	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses =
-			SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
+	private static final boolean shouldIntrospectorIgnoreBeaninfoClasses = SpringProperties.getFlag(IGNORE_BEANINFO_PROPERTY_NAME);
 
 	/** Stores the BeanInfoFactory instances. */
 	private static final List<BeanInfoFactory> beanInfoFactories = SpringFactoriesLoader.loadFactories(

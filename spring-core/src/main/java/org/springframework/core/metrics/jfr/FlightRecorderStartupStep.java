@@ -25,9 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.metrics.StartupStep;
 
 /**
- * {@link StartupStep} implementation for the Java Flight Recorder.
- * <p>This variant delegates to a {@link FlightRecorderStartupEvent JFR event extension}
- * to collect and record data in Java Flight Recorder.
+ * Java飞行记录器的 {@link StartupStep} 实现。
+ * 此变体委托 {@link FlightRecorderStartupEvent JFR 事件扩展} 来收集和记录 Java Flight Recorder 中的数据。
+ *
+ * 【扩展】
+ * Java Flight Recorder是一款优秀的java应用诊断工具，以前是商业版的特性，在java11之后版本开源，它导出的jfr文件可以用Java Mission Control来分析。
+ * JDK11之后内置了相关API，可以用来解析jfr文件，也可以在应用程序自定义事件发布出来
+ * JFR可以采用JVM命令启动，也可以使用jcmd的JFR.开头的命令在运行时操作
+ * 增加JVM参数：-XX:StartFlightRecording
  *
  * @author Brian Clozel
  */

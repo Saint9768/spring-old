@@ -76,9 +76,7 @@ class DefaultApplicationStartup implements ApplicationStartup {
 
 		}
 
-
 		static class DefaultTags implements StartupStep.Tags {
-
 			@Override
 			public Iterator<StartupStep.Tag> iterator() {
 				return Collections.emptyIterator();

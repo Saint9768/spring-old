@@ -51,13 +51,12 @@ import org.springframework.web.context.request.async.DeferredResult.DeferredResu
  * result can be accessed via {@link #getConcurrentResult()} or its presence
  * detected via {@link #hasConcurrentResult()}.
  *
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
- * @since 3.2
- * @see org.springframework.web.context.request.AsyncWebRequestInterceptor
- * @see org.springframework.web.servlet.AsyncHandlerInterceptor
- * @see org.springframework.web.filter.OncePerRequestFilter#shouldNotFilterAsyncDispatch
- * @see org.springframework.web.filter.OncePerRequestFilter#isAsyncDispatch
+ * 管理异步请求处理的中心类，主要用作SPI，通常不由应用程序类直接使用。
+ * 异步场景从线程 (T1) 中照常处理请求开始。 可以通过调用 startCallableProcessing 或 startDeferredResultProcessing 来启动并发请求处理，
+ * 这两者都会在单独的线程 (T2) 中产生结果。 结果被保存并将请求分派到容器，以在第三个线程 (T3) 中使用保存的结果恢复处理。
+ * 在分派线程 (T3) 中，保存的结果可以通过 getConcurrentResult() 访问或通过hasConcurrentResult() 检测到它的存在。
+ *
+ * SPI ，全称为 Service Provider Interface，是一种服务发现机制。它通过在ClassPath路径下的META-INF/services文件夹查找文件，自动加载文件里所定义的类。
  */
 public final class WebAsyncManager {
 

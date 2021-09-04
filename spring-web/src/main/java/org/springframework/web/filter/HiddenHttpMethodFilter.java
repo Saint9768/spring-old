@@ -81,12 +81,13 @@ public class HiddenHttpMethodFilter extends OncePerRequestFilter {
 
 		HttpServletRequest requestToUse = request;
 
+		// 必须是POST请求，才能使用_method方式
 		if ("POST".equals(request.getMethod()) && request.getAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE) == null) {
-			String paramValue = request.getParameter(this.methodParam);
+			String paramValue = request.getParameter(this.methodParam); // methodParam="_method"
 			if (StringUtils.hasLength(paramValue)) {
-				String method = paramValue.toUpperCase(Locale.ENGLISH);
-				if (ALLOWED_METHODS.contains(method)) {
-					requestToUse = new HttpMethodRequestWrapper(request, method);
+				String method = paramValue.toUpperCase(Locale.ENGLISH); // 将请求的value值转换为大写
+				if (ALLOWED_METHODS.contains(method)) { // ALLOWED_METHODS={PUT, PATCH, DELETE}
+					requestToUse = new HttpMethodRequestWrapper(request, method); // 将method=POST转换为method=PUT或PATCH或DELETE
 				}
 			}
 		}

@@ -22,67 +22,36 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link CommandLinePropertySource} implementation backed by a simple String array.
- *
- * <h3>Purpose</h3>
- * <p>This {@code CommandLinePropertySource} implementation aims to provide the simplest
- * possible approach to parsing command line arguments. As with all {@code
- * CommandLinePropertySource} implementations, command line arguments are broken into two
- * distinct groups: <em>option arguments</em> and <em>non-option arguments</em>, as
- * described below <em>(some sections copied from Javadoc for
- * {@link SimpleCommandLineArgsParser})</em>:
- *
- * <h3>Working with option arguments</h3>
- * <p>Option arguments must adhere to the exact syntax:
- *
- * <pre class="code">--optName[=optValue]</pre>
- *
- * <p>That is, options must be prefixed with "{@code --}" and may or may not
- * specify a value. If a value is specified, the name and value must be separated
- * <em>without spaces</em> by an equals sign ("="). The value may optionally be
- * an empty string.
- *
- * <h4>Valid examples of option arguments</h4>
- * <pre class="code">
- * --foo
- * --foo=
- * --foo=""
- * --foo=bar
- * --foo="bar then baz"
- * --foo=bar,baz,biz</pre>
- *
- * <h4>Invalid examples of option arguments</h4>
- * <pre class="code">
- * -foo
- * --foo bar
- * --foo = bar
- * --foo=bar --foo=baz --foo=biz</pre>
- *
- * <h3>Working with non-option arguments</h3>
- * <p>Any and all arguments specified at the command line without the "{@code --}"
- * option prefix will be considered as "non-option arguments" and made available
- * through the {@link CommandLineArgs#getNonOptionArgs()} method.
- *
- * <h3>Typical usage</h3>
- * <pre class="code">
- * public static void main(String[] args) {
- *     PropertySource<?> ps = new SimpleCommandLinePropertySource(args);
- *     // ...
- * }</pre>
- *
- * See {@link CommandLinePropertySource} for complete general usage examples.
- *
- * <h3>Beyond the basics</h3>
- *
- * <p>When more fully-featured command line parsing is necessary, consider using
- * the provided {@link JOptCommandLinePropertySource}, or implement your own
- * {@code CommandLinePropertySource} against the command line parsing library of your
- * choice.
- *
- * @author Chris Beams
- * @since 3.1
- * @see CommandLinePropertySource
- * @see JOptCommandLinePropertySource
+ * 由简单字符串数组支持的CommandLinePropertySource的实现类。
+ * 目的：
+ *   此CommandLinePropertySource实现旨在提供最简单的方法来解析命令行参数。
+ *   与所有CommandLinePropertySource实现一样，命令行参数分为两个不同的组：【选项参数】和【非选项参数】，
+ *   如下所述（从 SimpleCommandLineArgsParser 的 Javadoc 复制的某些部分）：
+ * 1> 使用选项参数
+ *    选项参数必须遵守确切的语法：--optName[=optValue]
+ *    也就是说，选项必须以“--”为前缀，并且可以指定也可以不指定值。如果指定了值，则名称和值必须用等号 ("=") 分隔，没有空格。该值可以选择为空字符串。
+ *    选项参数的有效示例:
+ *        --foo
+ *        --foo=
+ *        --foo=""
+ *        --foo=bar
+ *        --foo="bar then baz"
+ *        --foo=bar,baz,biz
+ *    选项参数的无效示例:
+ *        -foo
+ *        --foo bar
+ *        --foo = bar
+ *        --foo=bar --foo=baz --foo=biz
+ * 2> 使用非选项参数
+ *    在命令行中指定的任何和所有没有“--”选项前缀的参数都将被视为“非选项参数”并通过CommandLineArgs.getNonOptionArgs()方法提供。
+ *    典型用法:
+ *        public static void main(String[] args) {
+ *            PropertySource ps = new SimpleCommandLinePropertySource(args);
+ *            // ...
+ *        }
+ * 有关完整的一般用法示例，请参阅CommandLinePropertySource。
+ * 超越基础
+ * 当需要更全功能的命令行解析时，请考虑使用提供的JOptCommandLinePropertySource，或针对您选择的命令行解析库实现您自己的CommandLinePropertySource。
  */
 public class SimpleCommandLinePropertySource extends CommandLinePropertySource<CommandLineArgs> {
 
