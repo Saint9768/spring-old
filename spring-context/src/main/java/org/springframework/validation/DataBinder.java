@@ -744,6 +744,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void doBind(MutablePropertyValues mpvs) {
 		checkAllowedFields(mpvs);
 		checkRequiredFields(mpvs);
+		/** 属性值处理逻辑 */
+		// eg4:
 		applyPropertyValues(mpvs);
 	}
 
@@ -847,11 +849,12 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected void applyPropertyValues(MutablePropertyValues mpvs) {
 		try {
-			// Bind request parameters onto target object.
+			/** 将请求参数绑定到目标对象上 */
+			// eg4:
 			getPropertyAccessor().setPropertyValues(mpvs, isIgnoreUnknownFields(), isIgnoreInvalidFields());
 		}
 		catch (PropertyBatchUpdateException ex) {
-			// Use bind error processor to create FieldErrors.
+			/** 使用绑定错误处理器来创建 FieldErrors */
 			for (PropertyAccessException pae : ex.getPropertyAccessExceptions()) {
 				getBindingErrorProcessor().processPropertyAccessException(pae, getInternalBindingResult());
 			}

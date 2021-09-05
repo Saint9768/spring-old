@@ -1023,9 +1023,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * to find the first that supports the handler class.
 	 * <p>All HTTP methods are handled by this method. It's up to HandlerAdapters or handlers
 	 * themselves to decide which methods are acceptable.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @throws Exception in case of any kind of processing failure
 	 */
 	// eg1: request response
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -1041,7 +1038,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			Exception dispatchException = null;
 
 			try {
-				/** 检测上传请求 */
+				/** 是否是上传请求 */
 				processedRequest = checkMultipart(request);
 				// eg1: multipartRequestParsed = false
 				multipartRequestParsed = (processedRequest != request);
@@ -1089,10 +1086,10 @@ public class DispatcherServlet extends FrameworkServlet {
 				dispatchException = ex;
 			}
 			catch (Throwable err) {
-				// As of 4.3, we're processing Errors thrown from handler methods as well,
-				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+			/** 对发送结果进行处理 */
+			// eg3:
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1134,12 +1131,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * Handle the result of handler selection and handler invocation, which is
 	 * either a ModelAndView or an Exception to be resolved to a ModelAndView.
 	 */
+	// eg3:
 	private void processDispatchResult(HttpServletRequest request, HttpServletResponse response,
 			@Nullable HandlerExecutionChain mappedHandler, @Nullable ModelAndView mv,
 			@Nullable Exception exception) throws Exception {
 
 		boolean errorView = false;
 
+		/** 如果发生了异常，对异常进行处理 */
 		if (exception != null) {
 			if (exception instanceof ModelAndViewDefiningException) {
 				logger.debug("ModelAndViewDefiningException encountered", exception);
@@ -1152,8 +1151,10 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// Did the handler return a view to render?
+		/** 处理程序是否返回要渲染的视图？ */
 		if (mv != null && !mv.wasCleared()) {
+			/** 进行视图渲染 */
+			// eg3:
 			render(mv, request, response);
 			if (errorView) {
 				WebUtils.clearErrorRequestAttributes(request);
@@ -1392,6 +1393,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @throws ServletException if view is missing or cannot be resolved
 	 * @throws Exception if there's a problem rendering the view
 	 */
+	// eg3:
 	protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		// Determine locale for request and apply it to the response.
 		Locale locale =
@@ -1401,7 +1403,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		View view;
 		String viewName = mv.getViewName();
 		if (viewName != null) {
-			// We need to resolve the view name.
+			/** 我们需要解析视图名称 */
 			view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
 			if (view == null) {
 				throw new ServletException("Could not resolve view with name '" + mv.getViewName() +
@@ -1409,7 +1411,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		else {
-			// No need to lookup: the ModelAndView object contains the actual View object.
+			/** 无需查找：ModelAndView对象包含实际的 View 对象。 */
 			view = mv.getView();
 			if (view == null) {
 				throw new ServletException("ModelAndView [" + mv + "] neither contains a view name nor a " +
@@ -1417,7 +1419,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		// Delegate to the View object for rendering.
+		/** 委托给 View 对象进行渲染。 */
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view [" + view + "] ");
 		}
@@ -1425,6 +1427,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (mv.getStatus() != null) {
 				response.setStatus(mv.getStatus().value());
 			}
+			/** 对视图进行渲染操作 */
+			// eg3: AbstractView
 			view.render(mv.getModelInternal(), request, response);
 		}
 		catch (Exception ex) {

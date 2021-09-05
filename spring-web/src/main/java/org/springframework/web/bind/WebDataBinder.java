@@ -195,6 +195,7 @@ public class WebDataBinder extends DataBinder {
 		checkFieldDefaults(mpvs);
 		checkFieldMarkers(mpvs);
 		adaptEmptyArrayIndices(mpvs);
+		// eg4: DataBinder
 		super.doBind(mpvs);
 	}
 

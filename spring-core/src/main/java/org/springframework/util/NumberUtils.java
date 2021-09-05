@@ -195,6 +195,7 @@ public abstract class NumberUtils {
 	 * @see Double#valueOf
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
+	// eg4:
 	@SuppressWarnings("unchecked")
 	public static <T extends Number> T parseNumber(String text, Class<T> targetClass) {
 		Assert.notNull(text, "Text must not be null");
@@ -207,6 +208,7 @@ public abstract class NumberUtils {
 		else if (Short.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Short.decode(trimmed) : Short.valueOf(trimmed));
 		}
+		// eg4: 将String的15，转换为Integer类型
 		else if (Integer.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Integer.decode(trimmed) : Integer.valueOf(trimmed));
 		}

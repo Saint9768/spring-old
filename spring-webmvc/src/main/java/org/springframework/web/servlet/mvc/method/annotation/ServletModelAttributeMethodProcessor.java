@@ -150,11 +150,15 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * {@link ServletRequestDataBinder} before binding.
 	 * @see ServletRequestDataBinderFactory
 	 */
+	// eg4:
 	@Override
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
+		/** 获得原生的ServletRequest */
 		ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
 		Assert.state(servletRequest != null, "No ServletRequest");
 		ServletRequestDataBinder servletBinder = (ServletRequestDataBinder) binder;
+		/** 将ServletRequest的参数值绑定到Teacher中 */
+		// eg4:
 		servletBinder.bind(servletRequest);
 	}
 

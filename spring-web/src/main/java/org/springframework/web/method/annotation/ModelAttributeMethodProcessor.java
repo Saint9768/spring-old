@@ -118,6 +118,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * and the next method parameter is not of type {@link Errors}
 	 * @throws Exception if WebDataBinder initialization fails
 	 */
+	// eg4:
 	@Override
 	@Nullable
 	public final Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
@@ -160,11 +161,15 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 		}
 
 		if (bindingResult == null) {
-			// Bean property binding and validation;
-			// skipped in case of binding failure on construction.
+			/** Bean 属性绑定和验证 */
 			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 			if (binder.getTarget() != null) {
 				if (!mavContainer.isBindingDisabled(name)) {
+					/**
+					 * binder里包含了空属性的Teacher对象和124个类型转换器, webRequest中保存着web请求参数信息。
+					 * 然后通过bindRequestParameters方法，将request的请求数据通过类型转换器赋值给Teacher对象。
+					 */
+					// eg4: ServletModelAttributeMethodProcessor
 					bindRequestParameters(binder, webRequest);
 				}
 				validateIfApplicable(binder, parameter);
@@ -334,6 +339,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @param binder the data binder instance to use for the binding
 	 * @param request the current request
 	 */
+	// eg4:
 	protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
 		((WebRequestDataBinder) binder).bind(request);
 	}

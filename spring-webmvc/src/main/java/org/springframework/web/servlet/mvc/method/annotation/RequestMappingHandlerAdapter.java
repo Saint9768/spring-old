@@ -918,13 +918,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
 
-			/** 这块是真正执行请求处理的地方 */
+			/** 这块是真正执行请求处理的地方, invocableMethod包含了上面的【27个参数解析器】和【15个结果处理器】*/
 			// eg1:
 			invocableMethod.invokeAndHandle(webRequest, mavContainer);
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
 			}
 
+			/** 获得了模型和视图对象 (Map&Model的赋值逻辑在上层直到DispatchServlet的doDispatch(...)方法)*/
 			return getModelAndView(mavContainer, modelFactory, webRequest);
 		}
 		finally {

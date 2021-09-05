@@ -301,6 +301,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
+	// eg3:
 	@Override
 	public void render(@Nullable Map<String, ?> model, HttpServletRequest request,
 			HttpServletResponse response) throws Exception {
@@ -313,6 +314,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 		Map<String, Object> mergedModel = createMergedOutputModel(model, request, response);
 		prepareResponse(request, response);
+		// eg3: InternalResourceView
 		renderMergedOutputModel(mergedModel, getRequestToExpose(request), response);
 	}
 
@@ -439,6 +441,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	protected void exposeModelAsRequestAttributes(Map<String, Object> model,
 			HttpServletRequest request) throws Exception {
 
+		// eg3:
 		model.forEach((name, value) -> {
 			if (value != null) {
 				request.setAttribute(name, value);

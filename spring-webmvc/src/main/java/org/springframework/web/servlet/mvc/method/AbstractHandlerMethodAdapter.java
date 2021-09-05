@@ -85,6 +85,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
+		// eg1: handler=com.muse.springbootdemo.controller.DemoController#hello()
 		return handleInternal(request, response, (HandlerMethod) handler);
 	}
 

@@ -100,6 +100,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 	 * @see org.springframework.web.multipart.MultipartFile
 	 * @see #bind(org.springframework.beans.PropertyValues)
 	 */
+	// eg4:
 	public void bind(ServletRequest request) {
 		MutablePropertyValues mpvs = new ServletRequestParameterPropertyValues(request);
 		MultipartRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartRequest.class);
@@ -113,6 +114,8 @@ public class ServletRequestDataBinder extends WebDataBinder {
 			}
 		}
 		addBindValues(mpvs, request);
+		/** 真正的绑定逻辑代码 */
+		// eg4:
 		doBind(mpvs);
 	}
 

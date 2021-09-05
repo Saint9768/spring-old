@@ -31,6 +31,7 @@ import org.springframework.util.ClassUtils;
  * @author Stephane Nicoll
  * @since 3.0
  */
+// eg4:
 abstract class ConversionUtils {
 
 	@Nullable
@@ -38,6 +39,8 @@ abstract class ConversionUtils {
 			TypeDescriptor sourceType, TypeDescriptor targetType) {
 
 		try {
+			/** 转换操作 */
+			// eg4: ConverterFactoryAdapter
 			return converter.convert(source, sourceType, targetType);
 		}
 		catch (ConversionFailedException ex) {
